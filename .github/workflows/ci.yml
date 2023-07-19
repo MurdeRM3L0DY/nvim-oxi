@@ -1,0 +1,70 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        neovim: [v0.8.3, v0.9.0, nightly]
+        include:
+          - neovim: v0.8.3
+            features: "--features neovim-0-8"
+          - neovim: v0.9.0
+            features: "--features neovim-0-9"
+          - neovim: nightly
+            features: "--features neovim-nightly"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Neovim ${{ matrix.neovim }}
+        uses: rhysd/action-setup-vim@v1
+        with:
+            neovim: true
+            version: ${{ matrix.neovim }}
+      - name: Install latest stable `rustc`
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Run unit tests
+        run: cargo test ${{ matrix.features }}
+        working-directory: .
+      - name: Build the `tests` crate
+        run: cargo build ${{ matrix.features }}
+        working-directory: ./tests
+      - name: Run integration tests
+        run: cargo test ${{ matrix.features }}
+        working-directory: ./tests
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy
+      - run: cargo clippy --features neovim-nightly -- -D warnings
+
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+      - run: RUSTFLAGS="-D warnings" RUSTDOCFLAGS="--cfg docsrs" cargo doc --features neovim-nightly
+
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - run: cargo fmt --check

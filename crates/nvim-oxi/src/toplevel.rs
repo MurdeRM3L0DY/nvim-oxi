@@ -1,9 +1,9 @@
-use luajit_bindings::{self as lua, ffi::*, macros::cstr};
-use nvim_types::Function;
+use oxi_luajit::{self as lua, ffi::*, macros::cstr};
+use oxi_types::Function;
 
 use crate::Result;
 
-/// Binding to [`vim.schedule`][1].
+/// Binding to [`vim.schedule()`][1].
 ///
 /// Schedules a callback to be invoked soon by the main event-loop. Useful to
 /// avoid [`textlock`][2] or other temporary restrictions.
@@ -14,7 +14,7 @@ pub fn schedule<F>(fun: F)
 where
     F: FnOnce(()) -> Result<()> + 'static,
 {
-    // https://github.com/neovim/neovim/blob/master/src/nvim/lua/executor.c#L316
+    // https://github.com/neovim/neovim/blob/v0.9.0/src/nvim/lua/executor.c#L363
     //
     // Unfortunately the `nlua_schedule` C function is not exported, so we have
     // to call the Lua function instead.

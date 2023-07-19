@@ -1,5 +1,5 @@
 [package]
-name = "tests"
+name = "oxi-tests"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -8,8 +8,8 @@ publish = false
 crate-type = ["cdylib"]
 
 [features]
-neovim-0-7 = ["nvim-oxi/neovim-0-7"]
 neovim-0-8 = ["nvim-oxi/neovim-0-8"]
+neovim-0-9 = ["nvim-oxi/neovim-0-9"]
 neovim-nightly = ["nvim-oxi/neovim-nightly"]
 
 [dependencies]
